@@ -1,0 +1,71 @@
+# Configuration Cloud Build pour le déploiement automatique
+steps:
+  # Construire l'image API
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/jgazette-api:${_TAG}', './api']
+    id: 'build-api'
+
+  # Construire l'image Web
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/jgazette-web:${_TAG}', './web']
+    id: 'build-web'
+
+  # Pousser l'image API
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/jgazette-api:${_TAG}']
+    id: 'push-api'
+    waitFor: ['build-api']
+
+  # Pousser l'image Web
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', '${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/jgazette-web:${_TAG}']
+    id: 'push-web'
+    waitFor: ['build-web']
+
+  # Déployer l'API
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'jgazette-api'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/jgazette-api:${_TAG}'
+      - '--platform=managed'
+      - '--region=${_REGION}'
+      - '--allow-unauthenticated'
+      - '--set-secrets=JWT_SECRET=jwt-secret:latest,MONGODB_URI=mongodb-uri:latest'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--max-instances=10'
+      - '--min-instances=1'
+    id: 'deploy-api'
+    waitFor: ['push-api']
+
+  # Déployer le Web
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'gcloud'
+    args:
+      - 'run'
+      - 'deploy'
+      - 'jgazette-web'
+      - '--image=${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPO_NAME}/jgazette-web:${_TAG}'
+      - '--platform=managed'
+      - '--region=${_REGION}'
+      - '--allow-unauthenticated'
+      - '--memory=1Gi'
+      - '--cpu=1'
+      - '--max-instances=10'
+      - '--min-instances=1'
+    id: 'deploy-web'
+    waitFor: ['push-web']
+
+# Variables de substitution
+substitutions:
+  _REGION: 'us-central1'
+  _REPO_NAME: 'jgazette-repo'
+  _TAG: 'latest'
+
+# Options
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: 'E2_HIGHCPU_8'

@@ -1,0 +1,39 @@
+{
+  "name": "jgazette-api",
+  "version": "1.0.0",
+  "description": "API REST pour le blog JGazette",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node start.js",
+    "dev": "nodemon start.js",
+    "test-server": "node test-server.js",
+    "simple-test": "node simple-test-server.js",
+    "seed": "node src/scripts/seedData.js",
+    "create-users": "node src/scripts/createAdmin.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "blog",
+    "api",
+    "express",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.17.1",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
