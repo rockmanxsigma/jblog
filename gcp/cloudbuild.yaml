@@ -33,7 +33,7 @@ steps:
       - '--platform=managed'
       - '--region=${_REGION}'
       - '--allow-unauthenticated'
-      - '--set-secrets=JWT_SECRET=jwt-secret:latest,MONGODB_URI=mongodb-uri:latest'
+      - '--set-secrets=JWT_SECRET=jwt-secret:latest,MONGODB_ATLAS_URI=mongodb-atlas-uri:latest'
       - '--memory=2Gi'
       - '--cpu=2'
       - '--max-instances=10'

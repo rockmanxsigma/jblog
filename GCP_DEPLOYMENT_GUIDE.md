@@ -1,325 +1,271 @@
-# Guide de déploiement JGazette sur Google Cloud Platform
+# 🚀 Guide de Déploiement GCP - jBlog
 
-## 🚀 Vue d'ensemble
-
-Ce guide vous accompagne dans le déploiement de l'application JGazette sur Google Cloud Platform en utilisant :
-- **Cloud Run** pour les services (API et Frontend)
-- **Artifact Registry** pour les images Docker
-- **Secret Manager** pour les secrets
-- **MongoDB Atlas** (recommandé) ou **Cloud SQL** pour la base de données
+Ce guide vous accompagne pour déployer votre application jBlog sur Google Cloud Platform avec MongoDB Atlas.
 
 ## 📋 Prérequis
 
 ### 1. Outils nécessaires
-- [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) installé et configuré
-- [Docker](https://docs.docker.com/get-docker/) installé
-- Un compte Google Cloud Platform avec facturation activée
-- Un projet GCP créé
+- **Google Cloud CLI** : [Installation](https://cloud.google.com/sdk/docs/install)
+- **Docker** : [Installation](https://docs.docker.com/get-docker/)
+- **Node.js** (pour les tests locaux)
 
-### 2. Vérification de l'installation
+### 2. Comptes et services
+- **Compte Google Cloud Platform** avec facturation activée
+- **Projet GCP** créé
+- **MongoDB Atlas** configuré (déjà fait ✅)
+
+## 🔧 Configuration Initiale
+
+### 1. Authentification GCP
 ```bash
-# Vérifier gcloud
-gcloud version
+# Se connecter à votre compte Google
+gcloud auth login
 
-# Vérifier Docker
-docker --version
+# Configurer le projet par défaut
+gcloud config set project YOUR_PROJECT_ID
 
-# Vérifier la configuration gcloud
+# Vérifier la configuration
 gcloud config list
 ```
 
-## 🛠️ Déploiement automatique
+### 2. Configuration MongoDB Atlas
+Assurez-vous que votre MongoDB Atlas :
+- ✅ Est configuré et accessible
+- ✅ Autorise les connexions depuis n'importe où (0.0.0.0/0) pour le déploiement
+- ✅ A une URI de connexion valide
 
-### Option 1: Script automatisé (Recommandé)
+## 🚀 Déploiement Automatique
 
-1. **Cloner le repository et naviguer vers le dossier**
-```bash
-git clone <votre-repo>
-cd jgazette
+### Option 1 : Script PowerShell (Recommandé pour Windows)
+```powershell
+# Dans le dossier gcp/
+.\deploy-atlas.ps1 "YOUR_PROJECT_ID" "mongodb+srv://user:pass@cluster.mongodb.net/jgazette"
 ```
 
-2. **Rendre le script exécutable**
+### Option 2 : Script Bash (Linux/Mac)
 ```bash
-chmod +x gcp/deploy.sh
+# Dans le dossier gcp/
+chmod +x deploy-atlas.sh
+./deploy-atlas.sh "YOUR_PROJECT_ID" "mongodb+srv://user:pass@cluster.mongodb.net/jgazette"
 ```
 
-3. **Exécuter le script de déploiement**
+### Option 3 : Cloud Build (CI/CD)
 ```bash
-./gcp/deploy.sh YOUR_PROJECT_ID
+# Déployer avec Cloud Build
+gcloud builds submit --config gcp/cloudbuild.yaml \
+  --substitutions=_REGION=us-central1,_REPO_NAME=jgazette-repo,_TAG=latest
 ```
 
-Le script va automatiquement :
-- ✅ Activer les APIs nécessaires
-- ✅ Créer les services accounts
-- ✅ Configurer Artifact Registry
-- ✅ Construire et pousser les images Docker
-- ✅ Créer les secrets
-- ✅ Déployer les services Cloud Run
-- ✅ Configurer la base de données
+## 📝 Déploiement Manuel (Étape par étape)
 
-## 🔧 Déploiement manuel
-
-### 1. Configuration initiale
-
-```bash
-# Définir le projet
-export PROJECT_ID="your-project-id"
-export REGION="us-central1"
-
-# Configurer gcloud
-gcloud config set project $PROJECT_ID
-```
-
-### 2. Activer les APIs
-
+### 1. Activation des APIs
 ```bash
 gcloud services enable \
-    cloudbuild.googleapis.com \
-    run.googleapis.com \
-    sqladmin.googleapis.com \
-    secretmanager.googleapis.com \
-    artifactregistry.googleapis.com
+  cloudbuild.googleapis.com \
+  run.googleapis.com \
+  secretmanager.googleapis.com \
+  artifactregistry.googleapis.com
 ```
 
-### 3. Créer Artifact Registry
-
+### 2. Création du repository Artifact Registry
 ```bash
 gcloud artifacts repositories create jgazette-repo \
-    --repository-format=docker \
-    --location=$REGION \
-    --description="Repository Docker pour JGazette"
+  --repository-format=docker \
+  --location=us-central1 \
+  --description="Repository Docker pour JGazette"
 ```
 
-### 4. Configurer Docker
-
+### 3. Configuration Docker
 ```bash
-gcloud auth configure-docker ${REGION}-docker.pkg.dev
+gcloud auth configure-docker us-central1-docker.pkg.dev
 ```
 
-### 5. Construire et pousser les images
-
-```bash
-# Image API
-docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-api:latest ./api
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-api:latest
-
-# Image Web
-docker build -t ${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-web:latest ./web
-docker push ${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-web:latest
-```
-
-### 6. Créer les secrets
-
+### 4. Création des secrets
 ```bash
 # Secret JWT
-echo -n "your-super-secret-jwt-key" | gcloud secrets create jwt-secret --data-file=-
+echo -n "your-super-secret-jwt-key-change-in-production" | \
+gcloud secrets create jwt-secret --data-file=-
 
-# Secret MongoDB (remplacer par votre URI)
-echo -n "mongodb+srv://user:pass@cluster.mongodb.net/jgazette" | gcloud secrets create mongodb-uri --data-file=-
+# Secret MongoDB Atlas URI
+echo -n "mongodb+srv://user:pass@cluster.mongodb.net/jgazette" | \
+gcloud secrets create mongodb-atlas-uri --data-file=-
 ```
 
-### 7. Déployer les services
-
+### 5. Construction des images
 ```bash
-# Déployer l'API
+# Image API
+docker build -t us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo/jgazette-api:latest ./api
+docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo/jgazette-api:latest
+
+# Image Web
+docker build -t us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo/jgazette-web:latest ./web
+docker push us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo/jgazette-web:latest
+```
+
+### 6. Déploiement API
+```bash
 gcloud run deploy jgazette-api \
-    --image=${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-api:latest \
-    --platform=managed \
-    --region=$REGION \
-    --allow-unauthenticated \
-    --set-secrets="JWT_SECRET=jwt-secret:latest,MONGODB_URI=mongodb-uri:latest" \
-    --memory=2Gi \
-    --cpu=2
+  --image=us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo/jgazette-api:latest \
+  --platform=managed \
+  --region=us-central1 \
+  --allow-unauthenticated \
+  --set-secrets="JWT_SECRET=jwt-secret:latest,MONGODB_ATLAS_URI=mongodb-atlas-uri:latest" \
+  --set-env-vars="NODE_ENV=production,PORT=5000,UPLOAD_PATH=/tmp/uploads" \
+  --memory=2Gi \
+  --cpu=2 \
+  --max-instances=10 \
+  --min-instances=1
+```
 
-# Déployer le Frontend
+### 7. Déploiement Frontend
+```bash
+# Obtenir l'URL de l'API
+API_URL=$(gcloud run services describe jgazette-api --region=us-central1 --format="value(status.url)")
+
+# Déployer le frontend
 gcloud run deploy jgazette-web \
-    --image=${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-web:latest \
-    --platform=managed \
-    --region=$REGION \
-    --allow-unauthenticated \
-    --memory=1Gi \
-    --cpu=1
+  --image=us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo/jgazette-web:latest \
+  --platform=managed \
+  --region=us-central1 \
+  --allow-unauthenticated \
+  --set-env-vars="API_URL=${API_URL}" \
+  --memory=1Gi \
+  --cpu=1 \
+  --max-instances=10 \
+  --min-instances=1
 ```
 
-## 🗄️ Configuration de la base de données
+## 🔍 Vérification du Déploiement
 
-### Option A: MongoDB Atlas (Recommandé)
-
-1. **Créer un cluster MongoDB Atlas**
-   - Allez sur [MongoDB Atlas](https://www.mongodb.com/atlas)
-   - Créez un cluster gratuit (M0 Sandbox)
-   - Configurez l'accès réseau (0.0.0.0/0 pour Cloud Run)
-   - Créez un utilisateur de base de données
-
-2. **Obtenir la chaîne de connexion**
-   ```
-   mongodb+srv://username:password@cluster.mongodb.net/jgazette
-   ```
-
-3. **Mettre à jour le secret**
-   ```bash
-   echo -n "mongodb+srv://username:password@cluster.mongodb.net/jgazette" | \
-   gcloud secrets versions add mongodb-uri --data-file=-
-   ```
-
-### Option B: Cloud SQL (PostgreSQL)
-
-⚠️ **Note**: MongoDB n'est pas supporté nativement par Cloud SQL. Vous devrez adapter le code pour PostgreSQL.
-
+### 1. Obtenir les URLs
 ```bash
-# Créer une instance Cloud SQL
-gcloud sql instances create jgazette-db \
-    --database-version=POSTGRES_13 \
-    --tier=db-f1-micro \
-    --region=$REGION
+# URL de l'API
+gcloud run services describe jgazette-api --region=us-central1 --format="value(status.url)"
 
-# Créer la base de données
-gcloud sql databases create jgazette --instance=jgazette-db
-
-# Créer un utilisateur
-gcloud sql users create jgazette-user \
-    --instance=jgazette-db \
-    --password=jgazette-password
+# URL du Frontend
+gcloud run services describe jgazette-web --region=us-central1 --format="value(status.url)"
 ```
 
-## 🔍 Vérification du déploiement
-
-### 1. Vérifier les services Cloud Run
-
+### 2. Tests de santé
 ```bash
-# Lister les services
-gcloud run services list --region=$REGION
+# Test API
+curl https://YOUR_API_URL/health
 
-# Obtenir les URLs
-gcloud run services describe jgazette-api --region=$REGION --format="value(status.url)"
-gcloud run services describe jgazette-web --region=$REGION --format="value(status.url)"
+# Test Frontend
+curl https://YOUR_WEB_URL
 ```
 
-### 2. Tester les endpoints
-
+### 3. Logs
 ```bash
-# Tester l'API
-curl https://jgazette-api-XXXXX-uc.a.run.app/health
+# Logs API
+gcloud run services logs read jgazette-api --region=us-central1
 
-# Tester le Frontend
-curl https://jgazette-web-XXXXX-uc.a.run.app/health
+# Logs Frontend
+gcloud run services logs read jgazette-web --region=us-central1
 ```
 
-### 3. Vérifier les logs
+## 🔧 Configuration MongoDB Atlas pour GCP
 
+### 1. Network Access
+Dans MongoDB Atlas :
+1. Allez dans **Network Access**
+2. Ajoutez l'IP `0.0.0.0/0` (toutes les IPs) pour le déploiement
+3. Ou configurez les IPs spécifiques de GCP
+
+### 2. Database Access
+Assurez-vous que votre utilisateur a les permissions :
+- `readWrite` sur la base de données `jgazette`
+- Ou `dbAdmin` pour plus de permissions
+
+## 🛠️ Gestion Post-Déploiement
+
+### Mise à jour des secrets
 ```bash
-# Logs de l'API
-gcloud run services logs read jgazette-api --region=$REGION
+# Mettre à jour le secret JWT
+echo -n "new-jwt-secret" | gcloud secrets versions add jwt-secret --data-file=-
 
-# Logs du Frontend
-gcloud run services logs read jgazette-web --region=$REGION
+# Mettre à jour l'URI MongoDB
+echo -n "new-mongodb-uri" | gcloud secrets versions add mongodb-atlas-uri --data-file=-
 ```
 
-## 🔧 Configuration avancée
-
-### 1. Domaines personnalisés
-
+### Redéploiement
 ```bash
-# Mapper un domaine personnalisé
-gcloud run domain-mappings create \
-    --service=jgazette-web \
-    --domain=your-domain.com \
-    --region=$REGION
+# Redéployer l'API
+gcloud run deploy jgazette-api --region=us-central1
+
+# Redéployer le Frontend
+gcloud run deploy jgazette-web --region=us-central1
 ```
 
-### 2. SSL/TLS
-
-Les domaines personnalisés obtiennent automatiquement un certificat SSL via Google-managed certificates.
-
-### 3. Monitoring et alertes
-
-```bash
-# Activer Cloud Monitoring
-gcloud services enable monitoring.googleapis.com
-
-# Créer des alertes pour les erreurs 5xx
-gcloud alpha monitoring policies create --policy-from-file=monitoring-policy.yaml
-```
-
-### 4. Scaling automatique
-
-Les services Cloud Run s'adaptent automatiquement à la charge, mais vous pouvez configurer :
-
-```bash
-# Mettre à jour les limites de scaling
-gcloud run services update jgazette-api \
-    --region=$REGION \
-    --max-instances=50 \
-    --min-instances=2 \
-    --concurrency=100
-```
-
-## 💰 Estimation des coûts
-
-### Cloud Run
-- **Gratuit**: 2 millions de requêtes/mois
-- **Payant**: $0.40 par million de requêtes supplémentaires
-- **CPU/Mémoire**: Facturé par utilisation
-
-### Artifact Registry
-- **Gratuit**: 0.5 GB de stockage
-- **Payant**: $0.10/GB/mois
-
-### MongoDB Atlas
-- **Gratuit**: Cluster M0 (512 MB RAM)
-- **Payant**: À partir de $9/mois pour M2
-
-### Secret Manager
-- **Gratuit**: 6 secrets
-- **Payant**: $0.06/secret/mois
+### Monitoring
+- **Cloud Run Console** : https://console.cloud.google.com/run
+- **Secret Manager** : https://console.cloud.google.com/security/secret-manager
+- **Artifact Registry** : https://console.cloud.google.com/artifacts
 
 ## 🚨 Dépannage
 
-### Problèmes courants
+### Erreurs courantes
 
-1. **Erreur de permissions**
-   ```bash
-   # Vérifier les permissions du service account
-   gcloud projects get-iam-policy $PROJECT_ID
-   ```
-
-2. **Images non trouvées**
-   ```bash
-   # Vérifier que les images sont poussées
-   gcloud artifacts docker images list ${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo
-   ```
-
-3. **Erreurs de connexion à la base de données**
-   ```bash
-   # Vérifier les secrets
-   gcloud secrets versions list mongodb-uri
-   ```
-
-4. **Erreurs CORS**
-   - Vérifier que CORS_ORIGIN pointe vers l'URL correcte du frontend
-   - Mettre à jour le secret si nécessaire
-
-### Logs utiles
-
+#### 1. "Permission denied"
 ```bash
-# Logs en temps réel
-gcloud run services logs tail jgazette-api --region=$REGION
-
-# Logs avec filtres
-gcloud run services logs read jgazette-api --region=$REGION --filter="severity>=ERROR"
+# Vérifier l'authentification
+gcloud auth list
+gcloud config get-value project
 ```
 
-## 📚 Ressources supplémentaires
+#### 2. "Image not found"
+```bash
+# Vérifier que l'image est poussée
+gcloud artifacts docker images list us-central1-docker.pkg.dev/YOUR_PROJECT_ID/jgazette-repo
+```
 
-- [Documentation Cloud Run](https://cloud.google.com/run/docs)
-- [Documentation Artifact Registry](https://cloud.google.com/artifact-registry/docs)
-- [Documentation Secret Manager](https://cloud.google.com/secret-manager/docs)
-- [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/)
+#### 3. "Secret not found"
+```bash
+# Lister les secrets
+gcloud secrets list
+```
 
-## 🆘 Support
+#### 4. "MongoDB connection failed"
+- Vérifiez l'URI MongoDB Atlas
+- Vérifiez les permissions Network Access
+- Vérifiez les logs de l'API
 
-En cas de problème :
-1. Vérifiez les logs Cloud Run
-2. Consultez la documentation GCP
-3. Vérifiez les quotas et limites de votre projet
-4. Contactez le support Google Cloud si nécessaire
+### Logs détaillés
+```bash
+# Logs en temps réel
+gcloud run services logs tail jgazette-api --region=us-central1
+
+# Logs avec filtres
+gcloud run services logs read jgazette-api --region=us-central1 --filter="severity>=ERROR"
+```
+
+## 💰 Optimisation des coûts
+
+### 1. Configuration Cloud Run
+- **Min instances** : 0 (pour économiser)
+- **Max instances** : 5 (au lieu de 10)
+- **Memory** : 1Gi pour l'API, 512Mi pour le Web
+- **CPU** : 1 pour l'API, 0.5 pour le Web
+
+### 2. Monitoring des coûts
+- Surveillez l'utilisation dans la console GCP
+- Configurez des alertes de budget
+- Utilisez les quotas pour limiter les dépenses
+
+## 🎯 Prochaines étapes
+
+1. **Domaine personnalisé** : Configurez un domaine avec Cloud DNS
+2. **SSL/TLS** : Certificats automatiques avec Cloud Run
+3. **CDN** : Cloud CDN pour améliorer les performances
+4. **Monitoring** : Cloud Monitoring et Alerting
+5. **CI/CD** : GitHub Actions ou Cloud Build pour l'automatisation
+
+## 📞 Support
+
+- **Documentation GCP** : https://cloud.google.com/docs
+- **Documentation Cloud Run** : https://cloud.google.com/run/docs
+- **Documentation MongoDB Atlas** : https://docs.atlas.mongodb.com/
+
+---
+
+🎉 **Félicitations !** Votre application jBlog est maintenant déployée sur Google Cloud Platform avec MongoDB Atlas !
