@@ -330,6 +330,81 @@ export const deleteComment = async (req, res) => {
   }
 };
 
+// Vérifier le cooldown pour les commentaires
+export const checkCommentCooldown = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Récupérer l'utilisateur
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'Utilisateur non trouvé'
+      });
+    }
+
+    // Limite de temps entre commentaires selon le rôle
+    let timeLimitMinutes;
+    switch (user.role) {
+      case 'user':
+        timeLimitMinutes = 5; // 5 minutes pour les utilisateurs normaux
+        break;
+      case 'moderator':
+        timeLimitMinutes = 2; // 2 minutes pour les modérateurs
+        break;
+      case 'publisher':
+      case 'admin':
+        timeLimitMinutes = 1; // 1 minute pour les publishers et admins
+        break;
+      default:
+        timeLimitMinutes = 5; // Par défaut, 5 minutes
+    }
+
+    // Vérifier le dernier commentaire de l'utilisateur
+    const lastComment = await Comment.findOne({ author: userId })
+      .sort({ createdAt: -1 })
+      .limit(1);
+
+    if (lastComment) {
+      const timeSinceLastComment = Date.now() - new Date(lastComment.createdAt).getTime();
+      const timeLimitMs = timeLimitMinutes * 60 * 1000;
+
+      if (timeSinceLastComment < timeLimitMs) {
+        const remainingSeconds = Math.ceil((timeLimitMs - timeSinceLastComment) / 1000);
+        const remainingMinutes = Math.ceil(remainingSeconds / 60);
+        
+        return res.json({
+          success: true,
+          canComment: false,
+          remainingTime: remainingSeconds,
+          remainingMinutes: remainingMinutes,
+          timeLimit: timeLimitMinutes,
+          lastCommentAt: lastComment.createdAt,
+          message: `Veuillez attendre ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''} avant de poster un nouveau commentaire`
+        });
+      }
+    }
+
+    // L'utilisateur peut commenter
+    res.json({
+      success: true,
+      canComment: true,
+      remainingTime: 0,
+      remainingMinutes: 0,
+      timeLimit: timeLimitMinutes,
+      message: 'Vous pouvez poster un commentaire'
+    });
+
+  } catch (error) {
+    console.error('Erreur lors de la vérification du cooldown:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur interne du serveur'
+    });
+  }
+};
+
 // Like/unlike un commentaire
 export const toggleLike = async (req, res) => {
   try {

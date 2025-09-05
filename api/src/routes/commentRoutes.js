@@ -4,7 +4,8 @@ import {
   createComment, 
   updateComment, 
   deleteComment, 
-  toggleLike 
+  toggleLike,
+  checkCommentCooldown
 } from '../controllers/commentController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -12,6 +13,9 @@ const router = express.Router();
 
 // Récupérer les commentaires d'un post (public)
 router.get('/post/:postId', getCommentsByPost);
+
+// Vérifier le cooldown pour les commentaires (authentification requise)
+router.get('/cooldown', authenticateToken, checkCommentCooldown);
 
 // Créer un commentaire (authentification requise)
 router.post('/', authenticateToken, createComment);
