@@ -11,6 +11,16 @@
     "simple-test": "node simple-test-server.js",
     "seed": "node src/scripts/seedData.js",
     "create-users": "node src/scripts/createAdmin.js",
+    "export-data": "node scripts/export-local-data.js",
+    "export-data-nodejs": "node scripts/export-data-nodejs.js",
+    "import-atlas": "node scripts/import-atlas-data.js",
+    "import-atlas-nodejs": "node scripts/import-atlas-data-nodejs.js",
+    "check-data": "node scripts/check-local-data.js",
+    "create-test-data": "node scripts/create-test-data.js",
+    "diagnose-mongodb": "node scripts/diagnose-mongodb.js",
+    "setup-atlas": "node scripts/setup-atlas.js",
+    "switch-db": "node scripts/switch-database.js",
+    "test-atlas": "node scripts/test-atlas-connection.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [

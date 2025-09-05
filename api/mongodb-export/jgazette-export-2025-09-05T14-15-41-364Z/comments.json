@@ -1,0 +1,58 @@
+[
+  {
+    "_id": "68baa3b6afbc5a0b7b153994",
+    "content": "test",
+    "author": "68b45a9e9777f2f4e4b7b806",
+    "post": "68b45b48d50868ef3bd99d9f",
+    "parentComment": null,
+    "replies": [
+      "68baa4d0afbc5a0b7b1539ae"
+    ],
+    "likes": [],
+    "isApproved": true,
+    "approvedBy": null,
+    "approvedAt": null,
+    "isEdited": false,
+    "reports": [],
+    "moderationHistory": [],
+    "createdAt": "2025-09-05T08:47:50.152Z",
+    "updatedAt": "2025-09-05T08:52:32.985Z",
+    "__v": 0
+  },
+  {
+    "_id": "68baa4d0afbc5a0b7b1539ae",
+    "content": "test 2",
+    "author": "68b45a9e9777f2f4e4b7b806",
+    "post": "68b45b48d50868ef3bd99d9f",
+    "parentComment": "68baa3b6afbc5a0b7b153994",
+    "replies": [],
+    "likes": [],
+    "isApproved": true,
+    "approvedBy": null,
+    "approvedAt": null,
+    "isEdited": false,
+    "reports": [],
+    "moderationHistory": [],
+    "createdAt": "2025-09-05T08:52:32.975Z",
+    "updatedAt": "2025-09-05T08:52:32.975Z",
+    "__v": 0
+  },
+  {
+    "_id": "68baa7ddafbc5a0b7b1539df",
+    "content": "yeah man",
+    "author": "68b45a9e9777f2f4e4b7b806",
+    "post": "68b45b48d50868ef3bd99d9f",
+    "parentComment": null,
+    "replies": [],
+    "likes": [],
+    "isApproved": true,
+    "approvedBy": null,
+    "approvedAt": null,
+    "isEdited": false,
+    "reports": [],
+    "moderationHistory": [],
+    "createdAt": "2025-09-05T09:05:33.082Z",
+    "updatedAt": "2025-09-05T09:05:33.082Z",
+    "__v": 0
+  }
+]

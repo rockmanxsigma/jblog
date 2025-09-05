@@ -93,103 +93,29 @@ export const createComment = async (req, res) => {
     const userId = req.user._id;
 
     // Validation des données
-    if (!content || !content.trim()) {
-      return res.status(400).json({
-        success: false,
-        message: 'Le contenu du commentaire est requis'
-      });
+    const validationError = validateCommentData(content);
+    if (validationError) {
+      return res.status(400).json(validationError);
     }
 
-    if (content.length > 1000) {
-      return res.status(400).json({
-        success: false,
-        message: 'Le commentaire ne peut pas dépasser 1000 caractères'
-      });
+    // Vérifier l'utilisateur et le cooldown
+    const cooldownError = await checkUserCooldown(userId);
+    if (cooldownError) {
+      return res.status(429).json(cooldownError);
     }
 
-    // Vérification anti-spam basée sur le rôle de l'utilisateur
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Utilisateur non trouvé'
-      });
+    // Vérifier les références (post et commentaire parent)
+    const referenceError = await validateReferences(postId, parentCommentId);
+    if (referenceError) {
+      return res.status(404).json(referenceError);
     }
 
-    // Limite de temps entre commentaires selon le rôle
-    let timeLimitMinutes;
-    switch (user.role) {
-      case 'user':
-        timeLimitMinutes = 5; // 5 minutes pour les utilisateurs normaux
-        break;
-      case 'moderator':
-        timeLimitMinutes = 2; // 2 minutes pour les modérateurs
-        break;
-      case 'publisher':
-      case 'admin':
-        timeLimitMinutes = 1; // 1 minute pour les publishers et admins
-        break;
-      default:
-        timeLimitMinutes = 5; // Par défaut, 5 minutes
-    }
+    // Créer et sauvegarder le commentaire
+    const newComment = await createAndSaveComment(content, userId, postId, parentCommentId);
 
-    // Vérifier le dernier commentaire de l'utilisateur
-    const lastComment = await Comment.findOne({ author: userId })
-      .sort({ createdAt: -1 })
-      .limit(1);
-
-    if (lastComment) {
-      const timeSinceLastComment = Date.now() - new Date(lastComment.createdAt).getTime();
-      const timeLimitMs = timeLimitMinutes * 60 * 1000;
-
-      if (timeSinceLastComment < timeLimitMs) {
-        const remainingSeconds = Math.ceil((timeLimitMs - timeSinceLastComment) / 1000);
-        const remainingMinutes = Math.ceil(remainingSeconds / 60);
-        
-        return res.status(429).json({
-          success: false,
-          message: `Veuillez attendre ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''} avant de poster un nouveau commentaire`,
-          remainingTime: remainingSeconds,
-          timeLimit: timeLimitMinutes
-        });
-      }
-    }
-
-    // Vérifier que le post existe
-    const post = await Post.findById(postId);
-    if (!post) {
-      return res.status(404).json({
-        success: false,
-        message: 'Post non trouvé'
-      });
-    }
-
-    // Vérifier que le commentaire parent existe si spécifié
+    // Mettre à jour le commentaire parent si nécessaire
     if (parentCommentId) {
-      const parentComment = await Comment.findById(parentCommentId);
-      if (!parentComment) {
-        return res.status(404).json({
-          success: false,
-          message: 'Commentaire parent non trouvé'
-        });
-      }
-    }
-
-    // Créer le commentaire (approuvé par défaut)
-    const newComment = new Comment({
-      content: content.trim(),
-      author: userId,
-      post: postId,
-      parentComment: parentCommentId || null
-    });
-
-    await newComment.save();
-
-    // Si c'est une réponse, ajouter au commentaire parent
-    if (parentCommentId) {
-      await Comment.findByIdAndUpdate(parentCommentId, {
-        $push: { replies: newComment._id }
-      });
+      await updateParentComment(parentCommentId, newComment._id);
     }
 
     // Récupérer le commentaire avec les données populées
@@ -209,6 +135,126 @@ export const createComment = async (req, res) => {
       message: 'Erreur interne du serveur'
     });
   }
+};
+
+/**
+ * Valide les données du commentaire
+ */
+const validateCommentData = (content) => {
+  if (!content || !content.trim()) {
+    return {
+      success: false,
+      message: 'Le contenu du commentaire est requis'
+    };
+  }
+
+  if (content.length > 1000) {
+    return {
+      success: false,
+      message: 'Le commentaire ne peut pas dépasser 1000 caractères'
+    };
+  }
+
+  return null;
+};
+
+/**
+ * Vérifie le cooldown de l'utilisateur
+ */
+const checkUserCooldown = async (userId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    return {
+      success: false,
+      message: 'Utilisateur non trouvé'
+    };
+  }
+
+  const timeLimitMinutes = getTimeLimitByRole(user.role);
+  const lastComment = await Comment.findOne({ author: userId })
+    .sort({ createdAt: -1 })
+    .limit(1);
+
+  if (lastComment) {
+    const timeSinceLastComment = Date.now() - new Date(lastComment.createdAt).getTime();
+    const timeLimitMs = timeLimitMinutes * 60 * 1000;
+
+    if (timeSinceLastComment < timeLimitMs) {
+      const remainingSeconds = Math.ceil((timeLimitMs - timeSinceLastComment) / 1000);
+      const remainingMinutes = Math.ceil(remainingSeconds / 60);
+      
+      return {
+        success: false,
+        message: `Veuillez attendre ${remainingMinutes} minute${remainingMinutes > 1 ? 's' : ''} avant de poster un nouveau commentaire`,
+        remainingTime: remainingSeconds,
+        timeLimit: timeLimitMinutes
+      };
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Obtient la limite de temps selon le rôle
+ */
+const getTimeLimitByRole = (role) => {
+  const timeLimits = {
+    user: 5,
+    moderator: 2,
+    publisher: 1,
+    admin: 1
+  };
+  return timeLimits[role] || 5;
+};
+
+/**
+ * Valide les références (post et commentaire parent)
+ */
+const validateReferences = async (postId, parentCommentId) => {
+  const post = await Post.findById(postId);
+  if (!post) {
+    return {
+      success: false,
+      message: 'Post non trouvé'
+    };
+  }
+
+  if (parentCommentId) {
+    const parentComment = await Comment.findById(parentCommentId);
+    if (!parentComment) {
+      return {
+        success: false,
+        message: 'Commentaire parent non trouvé'
+      };
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Crée et sauvegarde un nouveau commentaire
+ */
+const createAndSaveComment = async (content, userId, postId, parentCommentId) => {
+  const newComment = new Comment({
+    content: content.trim(),
+    author: userId,
+    post: postId,
+    parentComment: parentCommentId || null
+  });
+
+  await newComment.save();
+  return newComment;
+};
+
+/**
+ * Met à jour le commentaire parent avec la nouvelle réponse
+ */
+const updateParentComment = async (parentCommentId, newCommentId) => {
+  await Comment.findByIdAndUpdate(parentCommentId, {
+    $push: { replies: newCommentId }
+  });
 };
 
 // Mettre à jour un commentaire

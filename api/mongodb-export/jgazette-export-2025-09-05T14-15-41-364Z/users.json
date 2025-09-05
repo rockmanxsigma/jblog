@@ -1,0 +1,110 @@
+[
+  {
+    "_id": "68b45a9d9777f2f4e4b7b803",
+    "username": "admin",
+    "email": "admin@jgazette.com",
+    "password": "$2b$12$45ro3ADAfFhNDjsrSwDGGuo5czXnbTlJlbncC87g9jdFxo7019JQe",
+    "role": "admin",
+    "isActive": true,
+    "isBanned": false,
+    "banInfo": {
+      "isBanned": false
+    },
+    "stats": {
+      "postsCount": 0,
+      "commentsCount": 0,
+      "likesGiven": 0,
+      "likesReceived": 0,
+      "lastActivity": "2025-08-31T14:22:21.599Z"
+    },
+    "preferences": {
+      "emailNotifications": true,
+      "theme": "auto",
+      "language": "fr"
+    },
+    "createdAt": "2025-08-31T14:22:21.599Z",
+    "updatedAt": "2025-08-31T14:22:22.142Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45a9e9777f2f4e4b7b806",
+    "username": "publisher",
+    "email": "publisher@jgazette.com",
+    "password": "$2b$12$v5sbZGY1OaveC2OfqPztFeq6fJBLddURkzx5IhzBNbmi4n9mvzeUO",
+    "role": "publisher",
+    "isActive": true,
+    "isBanned": false,
+    "banInfo": {
+      "isBanned": false
+    },
+    "stats": {
+      "postsCount": 0,
+      "commentsCount": 0,
+      "likesGiven": 0,
+      "likesReceived": 0,
+      "lastActivity": "2025-08-31T14:22:22.163Z"
+    },
+    "preferences": {
+      "emailNotifications": true,
+      "theme": "auto",
+      "language": "fr"
+    },
+    "createdAt": "2025-08-31T14:22:22.163Z",
+    "updatedAt": "2025-09-04T17:06:20.197Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45a9e9777f2f4e4b7b809",
+    "username": "moderator",
+    "email": "moderator@jgazette.com",
+    "password": "$2b$12$3N2pubjRZx9J/XBGSnRea.okXYERKRTYfdR5FoHmQ1NNkEi/RjqkK",
+    "role": "moderator",
+    "isActive": true,
+    "isBanned": false,
+    "banInfo": {
+      "isBanned": false
+    },
+    "stats": {
+      "postsCount": 0,
+      "commentsCount": 0,
+      "likesGiven": 0,
+      "likesReceived": 0,
+      "lastActivity": "2025-08-31T14:22:22.693Z"
+    },
+    "preferences": {
+      "emailNotifications": true,
+      "theme": "auto",
+      "language": "fr"
+    },
+    "createdAt": "2025-08-31T14:22:22.693Z",
+    "updatedAt": "2025-08-31T14:22:23.398Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45a9f9777f2f4e4b7b80c",
+    "username": "user",
+    "email": "user@jgazette.com",
+    "password": "$2b$12$0qHFFYXJ0SW6kND48mRqoejS8qEDBchTfW0xIMFXCz11TA3ZY/Qf6",
+    "role": "user",
+    "isActive": true,
+    "isBanned": false,
+    "banInfo": {
+      "isBanned": false
+    },
+    "stats": {
+      "postsCount": 0,
+      "commentsCount": 0,
+      "likesGiven": 0,
+      "likesReceived": 0,
+      "lastActivity": "2025-08-31T14:22:23.415Z"
+    },
+    "preferences": {
+      "emailNotifications": true,
+      "theme": "auto",
+      "language": "fr"
+    },
+    "createdAt": "2025-08-31T14:22:23.415Z",
+    "updatedAt": "2025-08-31T14:22:24.122Z",
+    "__v": 0
+  }
+]

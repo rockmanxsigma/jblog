@@ -1,0 +1,109 @@
+[
+  {
+    "_id": "68b45b48d50868ef3bd99d94",
+    "title": "Introduction à JavaScript",
+    "content": "# Introduction à JavaScript\n\nJavaScript est un langage de programmation dynamique et orienté objet.\n\n## Variables et types de données\n\n```javascript\n// Déclaration de variables\nlet nom = \"Alice\";\nconst age = 25;\nvar ville = \"Paris\";\n\n// Types de données\nlet nombre = 42;\nlet decimal = 3.14;\nlet booleen = true;\nlet tableau = [1, 2, 3, 4, 5];\nlet objet = { nom: \"Bob\", age: 30 };\n```\n\n## Fonctions\n\n```javascript\n// Fonction simple\nfunction saluer(nom) {\n    return \"Bonjour \" + nom + \" !\";\n}\n\n// Fonction fléchée\nconst multiplier = (a, b) => a * b;\n\n// Appel de fonction\nconsole.log(saluer(\"Alice\")); // Affiche: Bonjour Alice !\nconsole.log(multiplier(5, 3)); // Affiche: 15\n```\n\nJavaScript est un langage puissant qui permet de créer des applications web interactives et dynamiques.",
+    "excerpt": "Découvrez les bases de JavaScript avec des exemples pratiques",
+    "slug": "introduction-javascript",
+    "author": "68b45a9d9777f2f4e4b7b803",
+    "tags": [
+      "javascript",
+      "programmation",
+      "web"
+    ],
+    "status": "published",
+    "featuredImage": "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=800&h=400&fit=crop",
+    "readTime": 1,
+    "likes": [],
+    "likesCount": 0,
+    "createdAt": "2025-08-31T14:25:12.142Z",
+    "updatedAt": "2025-08-31T14:25:12.142Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45b48d50868ef3bd99d99",
+    "title": "Les bases de Python",
+    "content": "# Les bases de Python\n\nPython est un langage de programmation simple et puissant.\n\n## Variables et types\n\n```python\n# Variables simples\nnom = \"Alice\"\nage = 25\ntaille = 1.75\nest_etudiant = True\n\n# Types de données\nnombre = 42\ndecimal = 3.14\ntexte = \"Hello World\"\nliste = [1, 2, 3, 4, 5]\ndictionnaire = {\"nom\": \"Bob\", \"age\": 30}\n```\n\n## Fonctions\n\n```python\n# Fonction simple\ndef saluer(nom):\n    return f\"Bonjour {nom} !\"\n\n# Fonction avec paramètres par défaut\ndef multiplier(a, b=1):\n    return a * b\n\n# Appel de fonctions\nprint(saluer(\"Alice\"))  # Affiche: Bonjour Alice !\nprint(multiplier(5, 3))  # Affiche: 15\n```\n\nPython est excellent pour débuter en programmation !",
+    "excerpt": "Apprenez les fondamentaux du langage Python",
+    "slug": "bases-python",
+    "author": "68b45a9d9777f2f4e4b7b803",
+    "tags": [
+      "python",
+      "programmation",
+      "débutant"
+    ],
+    "status": "published",
+    "featuredImage": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=800&h=400&fit=crop",
+    "readTime": 1,
+    "likes": [],
+    "likesCount": 0,
+    "createdAt": "2025-08-31T14:25:12.175Z",
+    "updatedAt": "2025-08-31T14:25:12.175Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45b48d50868ef3bd99d9b",
+    "title": "Guide CSS Avancé",
+    "content": "# Guide CSS Avancé\n\nCSS permet de styliser vos pages web de manière professionnelle.\n\n## Flexbox\n\n```css\n.container {\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    flex-direction: row;\n    flex-wrap: wrap;\n}\n\n.item {\n    flex: 1;\n    margin: 10px;\n}\n```\n\n## Grid Layout\n\n```css\n.grid-container {\n    display: grid;\n    grid-template-columns: repeat(3, 1fr);\n    grid-gap: 20px;\n    grid-template-areas: \n        \"header header header\"\n        \"sidebar main main\"\n        \"footer footer footer\";\n}\n\n.header { grid-area: header; }\n.sidebar { grid-area: sidebar; }\n.main { grid-area: main; }\n.footer { grid-area: footer; }\n```\n\nCSS est essentiel pour créer des interfaces modernes et responsives !",
+    "excerpt": "Maîtrisez les techniques avancées de CSS",
+    "slug": "guide-css-avance",
+    "author": "68b45a9d9777f2f4e4b7b803",
+    "tags": [
+      "css",
+      "web",
+      "design"
+    ],
+    "status": "published",
+    "featuredImage": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop",
+    "readTime": 1,
+    "likes": [],
+    "likesCount": 0,
+    "createdAt": "2025-08-31T14:25:12.189Z",
+    "updatedAt": "2025-08-31T14:25:12.189Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45b48d50868ef3bd99d9d",
+    "title": "Développement Web avec React",
+    "content": "# Développement Web avec React\n\nReact est une bibliothèque JavaScript développée par Facebook pour créer des interfaces utilisateur.\n\n## Composants React\n\n```jsx\nimport React from 'react';\n\nfunction MonComposant() {\n    return (\n        <div className=\"mon-composant\">\n            <h1>Bonjour React !</h1>\n            <p>Ceci est mon premier composant</p>\n        </div>\n    );\n}\n\nexport default MonComposant;\n```\n\n## Hooks React\n\n```jsx\nimport React, { useState, useEffect } from 'react';\n\nfunction Compteur() {\n    const [count, setCount] = useState(0);\n    \n    useEffect(() => {\n        document.title = `Compteur: ${count}`;\n    }, [count]);\n    \n    return (\n        <div>\n            <p>Compteur: {count}</p>\n            <button onClick={() => setCount(count + 1)}>\n                Incrémenter\n            </button>\n        </div>\n    );\n}\n```\n\nReact simplifie grandement le développement d'applications web modernes !",
+    "excerpt": "Créez des applications web modernes avec React",
+    "slug": "developpement-react",
+    "author": "68b45a9d9777f2f4e4b7b803",
+    "tags": [
+      "react",
+      "javascript",
+      "web",
+      "frontend"
+    ],
+    "status": "published",
+    "featuredImage": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=800&h=400&fit=crop",
+    "readTime": 2,
+    "likes": [],
+    "likesCount": 0,
+    "createdAt": "2025-08-31T14:25:12.206Z",
+    "updatedAt": "2025-08-31T14:25:12.206Z",
+    "__v": 0
+  },
+  {
+    "_id": "68b45b48d50868ef3bd99d9f",
+    "title": "API REST avec Node.js et Express",
+    "content": "# API REST avec Node.js et Express\n\nNode.js permet de créer des applications serveur performantes avec JavaScript.\n\n## Configuration Express\n\n```javascript\nconst express = require('express');\nconst cors = require('cors');\nconst app = express();\n\n// Middleware\napp.use(cors());\napp.use(express.json());\n\nconst PORT = process.env.PORT || 3000;\napp.listen(PORT, () => {\n    console.log(`Serveur démarré sur le port ${PORT}`);\n});\n```\n\n## Routes GET\n\n```javascript\n// Route simple\napp.get('/api/users', (req, res) => {\n    res.json({\n        success: true,\n        data: [\n            { id: 1, nom: 'Alice' },\n            { id: 2, nom: 'Bob' }\n        ]\n    });\n});\n\n// Route avec paramètres\napp.get('/api/users/:id', (req, res) => {\n    const userId = req.params.id;\n    res.json({\n        success: true,\n        data: { id: userId, nom: 'Utilisateur' }\n    });\n});\n```\n\nNode.js et Express offrent une base solide pour créer des APIs modernes !",
+    "excerpt": "Construisez des APIs robustes avec Node.js",
+    "slug": "api-rest-nodejs-express",
+    "author": "68b45a9d9777f2f4e4b7b803",
+    "tags": [
+      "nodejs",
+      "express",
+      "api",
+      "backend"
+    ],
+    "status": "published",
+    "featuredImage": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&h=400&fit=crop",
+    "readTime": 1,
+    "likes": [],
+    "likesCount": 0,
+    "createdAt": "2025-08-31T14:25:12.229Z",
+    "updatedAt": "2025-08-31T14:25:12.229Z",
+    "__v": 0
+  }
+]

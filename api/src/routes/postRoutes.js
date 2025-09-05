@@ -9,7 +9,8 @@ import {
   getPostsByTag,
   toggleLike,
   getMyPosts,
-  removePostImage
+  removePostImage,
+  cleanupOrphanedImages
 } from '../controllers/postController.js';
 import { 
   authenticateToken, 
@@ -43,6 +44,9 @@ router.post('/posts/:postId/like', authenticateToken, toggleLike);
 
 // Route protégée - Suppression d'image
 router.delete('/posts/:postId/image', authenticateToken, removePostImage);
+
+// Route protégée - Nettoyage des images orphelines (admin seulement)
+router.post('/posts/cleanup-images', authenticateToken, requireAdmin, cleanupOrphanedImages);
 
 export default router;
 

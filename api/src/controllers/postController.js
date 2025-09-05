@@ -1,5 +1,7 @@
 import Post from '../models/Post.js';
-import User from '../models/User.js'; // Added import for User model
+import User from '../models/User.js';
+import fs from 'fs';
+import path from 'path';
 
 // Récupérer tous les articles publiés
 export const getAllPosts = async (req, res) => {
@@ -245,7 +247,7 @@ export const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
     
-    const post = await Post.findByIdAndDelete(id);
+    const post = await Post.findById(id);
     
     if (!post) {
       return res.status(404).json({
@@ -253,6 +255,13 @@ export const deletePost = async (req, res) => {
         message: 'Article non trouvé'
       });
     }
+
+    // Supprimer l'image associée si elle existe
+    if (post.featuredImage) {
+      await deleteImageFile(post.featuredImage);
+    }
+    
+    await Post.findByIdAndDelete(id);
     
     res.status(200).json({
       success: true,
@@ -470,6 +479,83 @@ export const removePostImage = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Erreur lors de la suppression de l\'image'
+    });
+  }
+};
+
+// Fonction utilitaire pour supprimer un fichier image
+const deleteImageFile = async (imageUrl) => {
+  try {
+    if (!imageUrl) return;
+    
+    // Extraire le nom du fichier de l'URL
+    const filename = imageUrl.split('/').pop();
+    if (!filename) return;
+    
+    const filePath = path.join('uploads/images', filename);
+    
+    // Vérifier si le fichier existe et le supprimer
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+      console.log(`Image supprimée: ${filename}`);
+    }
+  } catch (error) {
+    console.error('Erreur lors de la suppression du fichier image:', error);
+  }
+};
+
+// Fonction utilitaire pour nettoyer les images orphelines
+export const cleanupOrphanedImages = async (req, res) => {
+  try {
+    const uploadsDir = 'uploads/images';
+    
+    if (!fs.existsSync(uploadsDir)) {
+      return res.status(200).json({
+        success: true,
+        message: 'Aucune image à nettoyer',
+        deletedCount: 0
+      });
+    }
+    
+    // Récupérer tous les fichiers dans le dossier uploads
+    const files = fs.readdirSync(uploadsDir);
+    
+    // Récupérer toutes les images utilisées dans les posts
+    const posts = await Post.find({ featuredImage: { $exists: true, $ne: null } });
+    const usedImages = posts.map(post => {
+      if (post.featuredImage) {
+        return post.featuredImage.split('/').pop();
+      }
+      return null;
+    }).filter(Boolean);
+    
+    // Supprimer les fichiers orphelins
+    let deletedCount = 0;
+    for (const file of files) {
+      if (!usedImages.includes(file)) {
+        const filePath = path.join(uploadsDir, file);
+        try {
+          fs.unlinkSync(filePath);
+          deletedCount++;
+          console.log(`Image orpheline supprimée: ${file}`);
+        } catch (error) {
+          console.error(`Erreur lors de la suppression de ${file}:`, error);
+        }
+      }
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: `Nettoyage terminé. ${deletedCount} image(s) orpheline(s) supprimée(s)`,
+      deletedCount
+    });
+    
+  } catch (error) {
+    console.error('Erreur lors du nettoyage des images:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Erreur lors du nettoyage des images',
+      error: error.message
     });
   }
 };
