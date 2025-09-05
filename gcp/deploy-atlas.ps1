@@ -116,12 +116,12 @@ Write-Step "6. Construction et push des images Docker..."
 
 # Image API
 Write-Info "Construction de l'image API..."
-docker build -t "${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-api:latest" ./api
+docker build -t "${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-api:latest" ../api
 docker push "${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-api:latest"
 
 # Image Web
 Write-Info "Construction de l'image Web..."
-docker build -t "${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-web:latest" ./web
+docker build -t "${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-web:latest" ../web
 docker push "${REGION}-docker.pkg.dev/${PROJECT_ID}/jgazette-repo/jgazette-web:latest"
 
 Write-Step "7. Déploiement des services Cloud Run..."
@@ -135,7 +135,7 @@ gcloud run deploy jgazette-api `
     --allow-unauthenticated `
     --service-account=${SERVICE_ACCOUNT} `
     --set-secrets="JWT_SECRET=jwt-secret:latest,MONGODB_ATLAS_URI=mongodb-atlas-uri:latest" `
-    --set-env-vars="NODE_ENV=production,PORT=5000,CORS_ORIGIN=https://jgazette-web-${PROJECT_ID}.${REGION}.run.app,UPLOAD_PATH=/tmp/uploads" `
+    --set-env-vars="NODE_ENV=production,CORS_ORIGIN=https://jgazette-web-${PROJECT_ID}.${REGION}.run.app,UPLOAD_PATH=/tmp/uploads" `
     --memory=2Gi `
     --cpu=2 `
     --max-instances=10 `

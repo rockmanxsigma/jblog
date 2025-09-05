@@ -6,64 +6,31 @@ import path from 'path';
 // Récupérer tous les articles publiés
 export const getAllPosts = async (req, res) => {
   try {
-    // Données de test temporaires
-    const testPosts = [
-      {
-        _id: '1',
-        title: 'Bienvenue sur jBlog',
-        excerpt: 'Ceci est un article de test pour vérifier que l\'API fonctionne correctement.',
-        slug: 'bienvenue-sur-jblog',
-        author: {
-          _id: '1',
-          username: 'admin',
-          profile: {
-            firstName: 'Admin',
-            lastName: 'User'
-          }
-        },
-        tags: ['test', 'bienvenue'],
-        status: 'published',
-        featuredImage: null,
-        readTime: 2,
-        likesCount: 0,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      {
-        _id: '2',
-        title: 'Guide de démarrage',
-        excerpt: 'Apprenez comment utiliser cette plateforme de blog efficacement.',
-        slug: 'guide-de-demarrage',
-        author: {
-          _id: '1',
-          username: 'admin',
-          profile: {
-            firstName: 'Admin',
-            lastName: 'User'
-          }
-        },
-        tags: ['guide', 'tutoriel'],
-        status: 'published',
-        featuredImage: null,
-        readTime: 5,
-        likesCount: 3,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-
-    const posts = testPosts;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    
+    // Récupérer les posts depuis MongoDB Atlas
+    const posts = await Post.find({ status: 'published' })
+      .populate('author', 'username profile.firstName profile.lastName')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    
+    // Compter le total des posts
+    const totalPosts = await Post.countDocuments({ status: 'published' });
+    const totalPages = Math.ceil(totalPosts / limit);
     
     res.status(200).json({
       success: true,
       message: 'Articles récupérés avec succès',
       data: posts,
       pagination: {
-        currentPage: 1,
-        totalPages: 1,
-        totalPosts: posts.length,
-        hasNext: false,
-        hasPrev: false
+        currentPage: page,
+        totalPages: totalPages,
+        totalPosts: totalPosts,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
       }
     });
   } catch (error) {

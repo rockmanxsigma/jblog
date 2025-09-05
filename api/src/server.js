@@ -41,7 +41,7 @@ app.use(helmet({
 
 // Middleware CORS
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:4200',
+  origin: process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:4200',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -70,7 +70,7 @@ app.get('/images/:filename', (req, res) => {
   const filePath = `uploads/images/${filename}`;
   
   // Headers CORS explicites
-  res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+  res.header('Access-Control-Allow-Origin', process.env.CORS_ORIGIN || process.env.FRONTEND_URL || 'http://localhost:4200');
   res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');

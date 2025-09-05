@@ -94,8 +94,8 @@ try {
 # Tester la connexion MongoDB
 Write-Step "4. Test de connexion MongoDB..."
 try {
-    $dbResponse = Invoke-RestMethod -Uri "$apiService/api/posts" -Method Get -TimeoutSec 30
-    Write-Info "✅ Connexion MongoDB: OK (Posts récupérés: $($dbResponse.length))"
+    $dbResponse = Invoke-RestMethod -Uri "$apiService/posts" -Method Get -TimeoutSec 30
+    Write-Info "✅ Connexion MongoDB: OK (Posts récupérés: $($dbResponse.data.length))"
 } catch {
     Write-Error "❌ Erreur lors du test MongoDB: $_"
     Write-Info "Vérifiez la configuration MongoDB Atlas et les secrets"
